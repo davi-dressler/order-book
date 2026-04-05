@@ -4,12 +4,19 @@
 #include "Order.hpp"
 #include "Transaction.hpp"
 
+struct Node {
+    Order order;
+    Node * next;
+    // inicializador de order pq não podemos alterar a assinatura de submit
+    Node(Order o) : order(o), next(nullptr){}
+};
+
 class OrderBook {
 
 private:
-
-    // Estruturas internas escolhidas pelos alunos
-    // para armazenar ordens de compra, venda e transações
+    int size;
+    Node * sellOrders;
+    Node * buyOrders;
 
 public:
 
