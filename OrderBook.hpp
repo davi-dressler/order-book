@@ -5,16 +5,15 @@
 #include "Transaction.hpp"
 
 struct Node {
-    Order order;
+    Order * order;
     Node * next;
-    // inicializador de order pq não podemos alterar a assinatura de submit
-    Node(Order o) : order(o), next(nullptr){}
 };
 
 class OrderBook {
 
 private:
-    int size;
+    int sellSize;
+    int buySize;
     Node * sellOrders;
     Node * buyOrders;
 
@@ -23,6 +22,7 @@ public:
     OrderBook();
     ~OrderBook();
 
+    void insert(Node* currentNode, Node* newNode);
     bool submit(Order order);
     bool cancel(int id);
 
