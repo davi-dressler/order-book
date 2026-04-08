@@ -5,8 +5,6 @@
 using namespace std;
 
 OrderBook::OrderBook(){
-  this->buySize = 0;
-  this->sellSize = 0;
   this->sellOrders = nullptr;
   this->buyOrders = nullptr;
 
@@ -51,14 +49,11 @@ OrderBook::~OrderBook(){}
 bool OrderBook::submit(Order order){
   Node** currentNode;
   Node** complementNode;
-  Node * prevNode;
+  Node** prevNode;
   Node * newNode = new Node;
   newNode->order = new Order(order);
 
 
-  // cout << "Sell " << this->sellOrders << endl;
-  // cout << "Buy " << this->buyOrders << endl;
-  // cout << endl;
 
   if(order.getType() == 'B'){
     currentNode = &this->buyOrders;
@@ -81,12 +76,6 @@ bool OrderBook::submit(Order order){
     (*currentNode)->next = nullptr;
     (*currentNode)->order = new Order(order);
 
-    if(newNode->order->getType() == 'B'){
-      this->buySize += 1;
-    } else {
-      this->sellSize += 1;
-    } 
-
     cout << "Node: " << (*currentNode)->order->getId() << endl;
     cout << endl;
     cout << endl;
@@ -104,38 +93,28 @@ bool OrderBook::submit(Order order){
     return false;
   }
 
-  // TODO: transformar em função
+  // executar venda instantanea aqui
   if(order.getType() == 'B'){
-    float lesserPrice = (*complementNode)->order->getPrice(); // essa linha tá dando segfault
-    Node * prevLesserPrice = nullptr;
-    Node * lesserPriceNode = *currentNode;
-    // checa menor preço e se existe um preço que valha a pena
-    while((*complementNode)->next != nullptr){
-      float currentPrice = (*complementNode)->order->getPrice();
-      if(currentPrice < lesserPrice){
-        lesserPrice = currentPrice;
-        lesserPriceNode = *complementNode;
-        prevLesserPrice = prevNode;
+    do{
+      if((*complementNode)->order->getPrice() <= newNode->order->getPrice()){
+        //cancela
+        cout << "ordem com id " << (*complementNode)->order->getId() << " apagada" << endl;
+        return true; 
       }
-      prevNode = *complementNode;
-      *complementNode = (*complementNode)->next;
-    }
+      complementNode = &(*complementNode)->next;
+    }while((*complementNode)->next != nullptr);
+  } else if((*currentNode)->order->getType() == 'S'){
+    do{
+      if((*complementNode)->order->getPrice() >= newNode->order->getPrice()){
+        //cancela
+        cout << "ordem com id " << (*complementNode)->order->getId() << " apagada" << endl;
+        return true; 
+      }
 
-    // se existe um ou mais preços adequados executa a transação aqui
-    cout << "menor " << lesserPrice << endl;
-    cout << "ordem " << order.getPrice() << endl;
-    // if(lesserPrice <= order.getPrice()){
-    //   prevLesserPrice->next = lesserPriceNode->next;
-    //   // nessa linha executarei a transação //
-    //   // delete lesserPriceNode;
-    //   return true;
-    // }
+      complementNode = &(*complementNode)->next;
+    }while((*complementNode)->next != nullptr);
   }
-  else {
-    while((*complementNode)->next != nullptr){
-      break;
-    }
-  }
+  //
 
   if(*currentNode == nullptr){
     (*currentNode) = newNode;

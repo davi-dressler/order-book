@@ -10,8 +10,8 @@ int main(){
     Order teste1(2, 'S', 1, 3);
     Order teste2(3, 'S', 1, 4);
     Order teste3(4, 'S', 1, 5);
-    Order teste4(5, 'B', 1, 9);
-    Order teste5(5, 'B', 1, 9);
+    Order teste4(5, 'B', 5, 9);
+    Order teste5(6, 'B', 2, 90);
 
     OrderBook orderBook;
 

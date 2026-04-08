@@ -12,8 +12,6 @@ struct Node {
 class OrderBook {
 
 private:
-    int sellSize;
-    int buySize;
     Node * sellOrders;
     Node * buyOrders;
 
