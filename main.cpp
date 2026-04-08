@@ -11,6 +11,7 @@ int main(){
     Order teste2(3, 'S', 1, 4);
     Order teste3(4, 'S', 1, 5);
     Order teste4(5, 'B', 1, 9);
+    Order teste5(5, 'B', 1, 9);
 
     OrderBook orderBook;
 
@@ -19,6 +20,7 @@ int main(){
     orderBook.submit(teste2);
     orderBook.submit(teste3);
     orderBook.submit(teste4);
+    orderBook.submit(teste5);
     
     return 0;
 
