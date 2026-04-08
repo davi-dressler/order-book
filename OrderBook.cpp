@@ -12,31 +12,37 @@ OrderBook::OrderBook(){
 
 }
 
-void OrderBook::insert(Node* currentNode, Node* newNode){
-  Node * prevNode;
-  // Isso é muito confuso mas não tem jeito mt melhor
-  // Essa parte aparenta funcionar mas precisa ser testada
-  while(currentNode->next != nullptr){
-    prevNode = currentNode;
-    currentNode = currentNode->next;
+void printDebug(Node** currentNode){
+  while((*currentNode)->next != nullptr) {
+    cout << "Node: " << (*currentNode)->order->getId() << " " <<
+     "Timestemp: " << (*currentNode)->order->getTimestamp() << endl;
+    currentNode = &(*currentNode)->next;
+  }
+  cout << "Node: " << (*currentNode)->order->getId() << " " <<
+  "Timestemp: " << (*currentNode)->order->getTimestamp() << endl;
 
-    // Garantindo a ordenação
-    if(currentNode->order->getTimestamp() < newNode->order->getTimestamp()){
-      prevNode->next = newNode;
-      newNode->next = currentNode;
+  cout << endl;
+  cout << endl;
+  
+}
+
+void OrderBook::insert(Node** currentNode, Node** newNode){
+  if((*currentNode)->next == nullptr || (*newNode)->order->getTimestamp() > (*currentNode)->order->getTimestamp()){
+    (*newNode)->next = (*currentNode);
+    *currentNode = *newNode;
+    return;
+  }
+  Node** prevNode = nullptr;
+  while((*currentNode) != nullptr){
+    if(prevNode != nullptr && (*newNode)->order->getTimestamp() > (*currentNode)->order->getTimestamp()){
+      (*newNode)->next = (*currentNode);
+      (*prevNode)->next = (*newNode);
       return;
     }
+
+    prevNode = currentNode;
+    currentNode = &(*currentNode)->next;
   }
-  cout << "Inserindo " << newNode->order->getId() << endl;
-  cout << "Em " << currentNode->order->getId() << endl;
-  cout << endl;
-  currentNode->next = newNode;
-  
-  if(newNode->order->getType() == 'B'){
-    this->buySize += 1;
-  } else {
-    this->sellSize += 1;
-  } 
 }
 
 OrderBook::~OrderBook(){}
@@ -50,9 +56,9 @@ bool OrderBook::submit(Order order){
   newNode->order = new Order(order);
 
 
-  cout << "Sell " << this->sellOrders << endl;
-  cout << "Buy " << this->buyOrders << endl;
-  cout << endl;
+  // cout << "Sell " << this->sellOrders << endl;
+  // cout << "Buy " << this->buyOrders << endl;
+  // cout << endl;
 
   if(order.getType() == 'B'){
     currentNode = &this->buyOrders;
@@ -62,8 +68,11 @@ bool OrderBook::submit(Order order){
     complementNode = &this->buyOrders;
   }
 
-  cout << "currentNode " << currentNode << endl;
-  cout << "complementNode " << complementNode << endl;
+  cout << "currentNode " << (*currentNode) << endl;
+  if((*currentNode)){
+    cout << "next " << (*currentNode)->next << endl;
+  }
+  cout << "complementNode " << (*complementNode) << endl;
   cout << endl;
   
   if(*currentNode == nullptr && *complementNode == nullptr){
@@ -72,18 +81,21 @@ bool OrderBook::submit(Order order){
     (*currentNode)->next = nullptr;
     (*currentNode)->order = new Order(order);
 
+    if(newNode->order->getType() == 'B'){
+      this->buySize += 1;
+    } else {
+      this->sellSize += 1;
+    } 
+
     cout << "Node: " << (*currentNode)->order->getId() << endl;
     cout << endl;
     cout << endl;
 
     return false;
   } else if(*currentNode != nullptr && *complementNode == nullptr){
-    insert(*currentNode, newNode);
+    insert(currentNode, &newNode);
 
-    while((*currentNode)->next != nullptr) {
-      cout << "Node: " << (*currentNode)->order->getId() << endl;
-      currentNode = &(*currentNode)->next;
-    }
+    printDebug(currentNode);
 
     cout << "Node: " << (*currentNode)->order->getId() << endl;
     cout << endl;
@@ -93,47 +105,49 @@ bool OrderBook::submit(Order order){
   }
 
   // TODO: transformar em função
-  // if(order.getType() == 'B'){
-  //   float lesserPrice = (*complementNode)->order->getPrice(); // essa linha tá dando segfault
-  //   Node * prevLesserPrice = nullptr;
-  //   Node * lesserPriceNode = *currentNode;
-  //   // checa menor preço e se existe um preço que valha a pena
-  //   while((*complementNode)->next != nullptr){
-  //     float currentPrice = (*complementNode)->order->getPrice();
-  //     if(currentPrice < lesserPrice){
-  //       lesserPrice = currentPrice;
-  //       lesserPriceNode = *complementNode;
-  //       prevLesserPrice = prevNode;
-  //     }
-  //     prevNode = *complementNode;
-  //     *complementNode = (*complementNode)->next;
-  //   }
+  if(order.getType() == 'B'){
+    float lesserPrice = (*complementNode)->order->getPrice(); // essa linha tá dando segfault
+    Node * prevLesserPrice = nullptr;
+    Node * lesserPriceNode = *currentNode;
+    // checa menor preço e se existe um preço que valha a pena
+    while((*complementNode)->next != nullptr){
+      float currentPrice = (*complementNode)->order->getPrice();
+      if(currentPrice < lesserPrice){
+        lesserPrice = currentPrice;
+        lesserPriceNode = *complementNode;
+        prevLesserPrice = prevNode;
+      }
+      prevNode = *complementNode;
+      *complementNode = (*complementNode)->next;
+    }
 
-  //   // se existe um ou mais preços adequados executa a transação aqui
-  //   cout << "menor " << lesserPrice << endl;
-  //   cout << "ordem " << order.getPrice() << endl;
-  //   // if(lesserPrice <= order.getPrice()){
-  //   //   prevLesserPrice->next = lesserPriceNode->next;
-  //   //   // nessa linha executarei a transação //
-  //   //   // delete lesserPriceNode;
-  //   //   return true;
-  //   // }
-  // }
-  // else {
-  //   while((*complementNode)->next != nullptr){
-  //     break;
-  //   }
-  // }
-
-  cout << "Erro misterioso" << endl;
-  insert(*currentNode, newNode);
-  while((*currentNode)->next != nullptr) {
-    cout << "Node: " << (*currentNode)->order->getId() << endl;
-    currentNode = &(*currentNode)->next;
+    // se existe um ou mais preços adequados executa a transação aqui
+    cout << "menor " << lesserPrice << endl;
+    cout << "ordem " << order.getPrice() << endl;
+    // if(lesserPrice <= order.getPrice()){
+    //   prevLesserPrice->next = lesserPriceNode->next;
+    //   // nessa linha executarei a transação //
+    //   // delete lesserPriceNode;
+    //   return true;
+    // }
   }
-  cout << "Node: " << (*currentNode)->order->getId() << endl;
-  cout << endl;
-  cout << endl;
+  else {
+    while((*complementNode)->next != nullptr){
+      break;
+    }
+  }
+
+  if(*currentNode == nullptr){
+    (*currentNode) = newNode;
+    (*currentNode)->next = nullptr;
+    (*currentNode)->order = new Order(order);
+
+    printDebug(currentNode);
+
+    return false;
+  }
+  insert(currentNode, &newNode);
+  printDebug(currentNode);
   
   return false;
 }

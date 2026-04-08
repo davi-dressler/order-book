@@ -22,7 +22,7 @@ public:
     OrderBook();
     ~OrderBook();
 
-    void insert(Node* currentNode, Node* newNode);
+    void insert(Node** currentNode, Node** newNode);
     bool submit(Order order);
     bool cancel(int id);
 
