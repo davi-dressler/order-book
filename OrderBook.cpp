@@ -7,6 +7,8 @@ using namespace std;
 OrderBook::OrderBook(){
   this->sellOrders = nullptr;
   this->buyOrders = nullptr;
+  this->size_sell = 0;
+  this->size_buy = 0;
 
 }
 
@@ -58,9 +60,13 @@ bool OrderBook::submit(Order order){
   if(order.getType() == 'B'){
     currentNode = &this->buyOrders;
     complementNode = &this->sellOrders;
-  } else if(order.getType() == 'S') {
+    this->size_buy++;
+  } 
+  
+  else if(order.getType() == 'S') {
     currentNode = &this->sellOrders;
     complementNode = &this->buyOrders;
+    this->size_sell++;
   }
 
   cout << "currentNode " << (*currentNode) << endl;
@@ -70,8 +76,9 @@ bool OrderBook::submit(Order order){
   cout << "complementNode " << (*complementNode) << endl;
   cout << endl;
   
+  //Tratando a primeira inserção de uma ordem no sistema
   if(*currentNode == nullptr && *complementNode == nullptr){
-    cout << "primeira inserção" << endl;
+    cout << "[Abertura de Ordem] A ordem ID " << order.getId() << " esta em aberto." << endl;
     (*currentNode) = newNode;
     (*currentNode)->next = nullptr;
     (*currentNode)->order = new Order(order);
@@ -81,10 +88,13 @@ bool OrderBook::submit(Order order){
     cout << endl;
 
     return false;
-  } else if(*currentNode != nullptr && *complementNode == nullptr){
+  } 
+  
+  else if(*currentNode != nullptr && *complementNode == nullptr){
     insert(currentNode, &newNode);
 
     printDebug(currentNode);
+    cout << "[Abertura de Ordem] A ordem ID " << order.getId() << " esta em aberto." << endl;
 
     cout << "Node: " << (*currentNode)->order->getId() << endl;
     cout << endl;
@@ -96,22 +106,32 @@ bool OrderBook::submit(Order order){
   // executar venda instantanea aqui
   if(order.getType() == 'B'){
     do{
-      if((*complementNode)->order->getPrice() <= newNode->order->getPrice()){
-        //cancela
-        cout << "ordem com id " << (*complementNode)->order->getId() << " apagada" << endl;
-        return true; 
-      }
-      complementNode = &(*complementNode)->next;
-    }while((*complementNode)->next != nullptr);
-  } else if((*currentNode)->order->getType() == 'S'){
-    do{
-      if((*complementNode)->order->getPrice() >= newNode->order->getPrice()){
-        //cancela
-        cout << "ordem com id " << (*complementNode)->order->getId() << " apagada" << endl;
+      if((*complementNode)->order->getPrice() <= newNode->order->getPrice()){//Procura uma ordem de venda com preço menor que a de compra que estamos inserindo
+        cout << "[Execucao] A Ordem de compra com ID " << order.getId() << " foi executada." << endl;
+        cout << "[Execucao] A Ordem de venda com ID " << (*complementNode)->order->getId() << " foi executada." << endl;
+        cancel((*complementNode)->order->getId());
+        this->size_sell--;
+        this->size_buy--;
         return true; 
       }
 
-      complementNode = &(*complementNode)->next;
+      // complementNode = &(*complementNode)->next; !Nota: Samuel, o método cancela já faz isso. (apagar quando ver)
+    }while((*complementNode)->next != nullptr);
+  } 
+  
+  else if(order.getType() == 'S'){
+    do{
+      if((*complementNode)->order->getPrice() >= newNode->order->getPrice()){//Procura uma ordem de compra com preço maior que a de compra que estamos inserindo
+        cout << "[Execucao] A Ordem de compra com ID " << (*complementNode)->order->getId() << " foi executada." << endl;
+        cout << "[Execucao] A Ordem de venda com ID " << order.getId() << " foi executada." << endl;
+        cancel((*complementNode)->order->getId());
+        this->size_sell--;
+        this->size_buy--;
+        return true; 
+
+      }
+
+      // complementNode = &(*complementNode)->next; !Nota: Samuel, o método cancela já faz isso. (apagar quando ver)
     }while((*complementNode)->next != nullptr);
   }
   //
@@ -125,6 +145,7 @@ bool OrderBook::submit(Order order){
 
     return false;
   }
+
   insert(currentNode, &newNode);
   printDebug(currentNode);
   
@@ -132,7 +153,7 @@ bool OrderBook::submit(Order order){
 }
 
 bool OrderBook::cancel(int id){
-  Node* anterior = nullptr;
+  Node* anterior_sell = nullptr;
   Node* atual_sell = sellOrders;
 
   //Iniciamos a busca da ordem em sellOrders
@@ -140,12 +161,12 @@ bool OrderBook::cancel(int id){
 
     if(atual_sell -> order -> getId() == id){
 
-      if(anterior == nullptr){ //Caso a ordem seja o head da nossa lista encadeada
+      if(anterior_sell == nullptr){ //Caso a ordem seja o head da nossa lista encadeada
         sellOrders = atual_sell -> next;
       } 
       
       else{
-        anterior -> next = atual_sell -> next;
+        anterior_sell -> next = atual_sell -> next;
       }
 
       //Aplicação dos destrutores
@@ -154,9 +175,11 @@ bool OrderBook::cancel(int id){
       cout << "[Cancelamento] A ordem ID " << id << " foi cancelada." << endl;
       return true;
     }
+    anterior_sell = atual_sell;
     atual_sell = atual_sell -> next;
   }
 
+  Node* anterior_buy = nullptr;
   Node* atual_buy = buyOrders;
 
   //Iniciamos a busca da ordem em buyOrders
@@ -164,12 +187,12 @@ bool OrderBook::cancel(int id){
 
     if(atual_buy -> order -> getId() == id){
 
-      if(anterior == nullptr){//Caso a ordem seja o head da nossa lista encadeada
+      if(anterior_buy == nullptr){//Caso a ordem seja o head da nossa lista encadeada
         sellOrders = atual_buy -> next;
       } 
       
       else{//Conectamos o nó anterior com o próximo
-        anterior -> next = atual_buy -> next;
+        anterior_buy -> next = atual_buy -> next;
       }
 
       //Aplicação dos destrutores
@@ -181,13 +204,75 @@ bool OrderBook::cancel(int id){
 
     atual_buy = atual_buy -> next;
   }
-  return true;
+  return false;
 }
 
-Order* OrderBook::getBuyOrders(int* n){return nullptr;}
-Order* OrderBook::getSellOrders(int* n){return nullptr;}
+//Não testada ainda
+Order* OrderBook::getBuyOrders(int* n){
+  *n = this-> size_buy;
+  Order* buy_array = new Order[*n];
+  Node* atual_buy = buyOrders;
+  int idx = 0;
+
+  if(buyOrders == nullptr) return nullptr;
+
+  cout << *n;
+  while(atual_buy != nullptr){
+    buy_array[idx] = *atual_buy->order;
+    atual_buy = atual_buy -> next;
+    idx++;
+  }
+
+  return buy_array;
+}
+
+//Não testada ainda
+Order* OrderBook::getSellOrders(int* n){
+  *n = this-> size_buy;
+  Order* sell_array = new Order[*n];
+  Node* atual_sell = buyOrders;
+  int idx = 0;
+
+  if(buyOrders == nullptr) return nullptr;
+
+  cout << *n;
+  while(atual_sell != nullptr){
+    sell_array[idx] = *atual_sell->order;
+    atual_sell = atual_sell -> next;
+    idx++;
+  }
+
+  return sell_array;
+}
+
 Transaction* OrderBook::getTransactions(int* n){return nullptr;}
 
-void OrderBook::printBuyOrders(){}
-void OrderBook::printSellOrders(){}
+void OrderBook::printBuyOrders(){
+  Node* atual_buy = buyOrders;
+
+  cout << endl;
+  cout << "[ --- BuyOrders --- ]" << endl;
+
+  while(atual_buy != nullptr){
+    cout << "[" << atual_buy->order->getId() << " | " << atual_buy->order->getPrice() << " | " << atual_buy->order->getTimestamp() << "]" << endl;
+
+
+    atual_buy = atual_buy -> next;
+  }
+}
+
+void OrderBook::printSellOrders(){
+  Node* atual_sell = sellOrders;
+
+  cout << endl;
+  cout << "[ --- SellOrders --- ]" << endl;
+
+  while(atual_sell != nullptr){
+    cout << "[" << atual_sell->order->getId() << " | " << atual_sell->order->getPrice() << " | " << atual_sell->order->getTimestamp() << "]" << endl;
+
+
+    atual_sell = atual_sell -> next;
+  }
+}
+
 void OrderBook::printTransactions(){}

@@ -14,6 +14,8 @@ class OrderBook {
 private:
     Node * sellOrders;
     Node * buyOrders;
+    int size_buy;
+    int size_sell;
 
 public:
 

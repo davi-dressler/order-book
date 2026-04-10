@@ -7,6 +7,8 @@ Order::Order(int id, char type, float price, int timestamp){
     this->timestamp = timestamp;
 }
 
+Order::Order(){};
+
 Order::~Order(){}
 
 int Order::getId(){
