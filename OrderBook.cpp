@@ -210,7 +210,7 @@ bool OrderBook::cancel(int id){
 //Não testada ainda
 Order* OrderBook::getBuyOrders(int* n){
   *n = this-> size_buy;
-  Order* buy_array = new Order[*n];
+  Order* buy_array = new Order[*n]; //Destrutor desse??
   Node* atual_buy = buyOrders;
   int idx = 0;
 
@@ -229,7 +229,7 @@ Order* OrderBook::getBuyOrders(int* n){
 //Não testada ainda
 Order* OrderBook::getSellOrders(int* n){
   *n = this-> size_buy;
-  Order* sell_array = new Order[*n];
+  Order* sell_array = new Order[*n]; //Destrutor desse??
   Node* atual_sell = buyOrders;
   int idx = 0;
 

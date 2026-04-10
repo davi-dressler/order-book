@@ -10,8 +10,7 @@ private:
     int timestamp;
 
 public:
-
-    Order(){};
+    Order();
     Order(int id, char type, float price, int timestamp);
     ~Order();
 
