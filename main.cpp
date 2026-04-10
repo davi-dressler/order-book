@@ -18,9 +18,13 @@ int main(){
     orderBook.submit(teste0);
     orderBook.submit(teste1);
     orderBook.submit(teste2);
+    orderBook.cancel(2);
     orderBook.submit(teste3);
     orderBook.submit(teste4);
+    orderBook.cancel(2);
     orderBook.submit(teste5);
+    orderBook.cancel(2);
+
     
     return 0;
 

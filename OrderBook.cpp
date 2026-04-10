@@ -131,7 +131,58 @@ bool OrderBook::submit(Order order){
   return false;
 }
 
-bool OrderBook::cancel(int id){return false;}
+bool OrderBook::cancel(int id){
+  Node* anterior = nullptr;
+  Node* atual_sell = sellOrders;
+
+  //Iniciamos a busca da ordem em sellOrders
+  while(atual_sell != nullptr){
+
+    if(atual_sell -> order -> getId() == id){
+
+      if(anterior == nullptr){ //Caso a ordem seja o head da nossa lista encadeada
+        sellOrders = atual_sell -> next;
+      } 
+      
+      else{
+        anterior -> next = atual_sell -> next;
+      }
+
+      //Aplicação dos destrutores
+      delete atual_sell -> order;
+      delete atual_sell;
+      cout << "[Cancelamento] A ordem ID " << id << " foi cancelada." << endl;
+      return true;
+    }
+    atual_sell = atual_sell -> next;
+  }
+
+  Node* atual_buy = buyOrders;
+
+  //Iniciamos a busca da ordem em buyOrders
+  while(atual_buy != nullptr){
+
+    if(atual_buy -> order -> getId() == id){
+
+      if(anterior == nullptr){//Caso a ordem seja o head da nossa lista encadeada
+        sellOrders = atual_buy -> next;
+      } 
+      
+      else{//Conectamos o nó anterior com o próximo
+        anterior -> next = atual_buy -> next;
+      }
+
+      //Aplicação dos destrutores
+      delete atual_buy -> order;
+      delete atual_buy;
+      cout << "[Cancelamento] A ordem ID " << id << " foi cancelada." << endl;
+      return true;
+    }
+
+    atual_buy = atual_buy -> next;
+  }
+  return true;
+}
 
 Order* OrderBook::getBuyOrders(int* n){return nullptr;}
 Order* OrderBook::getSellOrders(int* n){return nullptr;}
