@@ -52,7 +52,34 @@ void OrderBook::insert(Node** currentNode, Node** newNode){
   }
 }
 
-OrderBook::~OrderBook(){}
+OrderBook::~OrderBook(){
+    // Libera lista de buyOrders
+    Node* current = this->buyOrders;
+    while(current != nullptr){
+        Node* next = current->next;
+        delete current->order;
+        delete current;
+        current = next;
+    }
+
+    // Libera lista de sellOrders
+    current = this->sellOrders;
+    while(current != nullptr){
+        Node* next = current->next;
+        delete current->order;
+        delete current;
+        current = next;
+    }
+
+    // Libera lista de transactions
+    TransactionNode* currentTrans = this->transactions;
+    while(currentTrans != nullptr){
+        TransactionNode* next = currentTrans->next;
+        delete currentTrans->transaction;
+        delete currentTrans;
+        currentTrans = next;
+    }
+}
 
 // talvez compense mais criar funções auxiliares de adição de node TALVEZ
 bool OrderBook::submit(Order order){
