@@ -8,12 +8,17 @@ struct Node {
     Order * order;
     Node * next;
 };
+struct TransactionNode {
+    Transaction * transaction;
+    TransactionNode * next;
+};
 
 class OrderBook {
 
 private:
     Node * sellOrders;
     Node * buyOrders;
+    TransactionNode * transactions;
     int size_buy;
     int size_sell;
 
@@ -22,7 +27,9 @@ public:
     OrderBook();
     ~OrderBook();
 
+    void insertTransaction(TransactionNode** newNode);
     void insert(Node** currentNode, Node** newNode);
+    void nodeDelete(Node** prevNode, Node** currentNode);
     bool submit(Order order);
     bool cancel(int id);
 
