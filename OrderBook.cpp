@@ -26,6 +26,7 @@ void printDebug(Node** currentNode){
   
 }
 
+// Fazer overflow no método insert para inserir transações numa lista de transações
 void OrderBook::insert(Node** currentNode, Node** newNode){
   if((*currentNode)->next == nullptr || (*newNode)->order->getTimestamp() > (*currentNode)->order->getTimestamp()){
     (*newNode)->next = (*currentNode);
@@ -69,12 +70,12 @@ bool OrderBook::submit(Order order){
     this->size_sell++;
   }
 
-  cout << "currentNode " << (*currentNode) << endl;
-  if((*currentNode)){
-    cout << "next " << (*currentNode)->next << endl;
-  }
-  cout << "complementNode " << (*complementNode) << endl;
-  cout << endl;
+  // cout << "currentNode " << (*currentNode) << endl;
+  // if((*currentNode)){
+  //   cout << "next " << (*currentNode)->next << endl;
+  // }
+  // cout << "complementNode " << (*complementNode) << endl;
+  // cout << endl;
   
   //Tratando a primeira inserção de uma ordem no sistema
   if(*currentNode == nullptr && *complementNode == nullptr){
@@ -83,9 +84,9 @@ bool OrderBook::submit(Order order){
     (*currentNode)->next = nullptr;
     (*currentNode)->order = new Order(order);
 
-    cout << "Node: " << (*currentNode)->order->getId() << endl;
-    cout << endl;
-    cout << endl;
+    // cout << "Node: " << (*currentNode)->order->getId() << endl;
+    // cout << endl;
+    // cout << endl;
 
     return false;
   } 
@@ -93,12 +94,12 @@ bool OrderBook::submit(Order order){
   else if(*currentNode != nullptr && *complementNode == nullptr){
     insert(currentNode, &newNode);
 
-    printDebug(currentNode);
+    // printDebug(currentNode);
     cout << "[Abertura de Ordem] A ordem ID " << order.getId() << " esta em aberto." << endl;
 
-    cout << "Node: " << (*currentNode)->order->getId() << endl;
-    cout << endl;
-    cout << endl;
+    // cout << "Node: " << (*currentNode)->order->getId() << endl;
+    // cout << endl;
+    // cout << endl;
 
     return false;
   }
@@ -115,7 +116,7 @@ bool OrderBook::submit(Order order){
         return true; 
       }
 
-      // complementNode = &(*complementNode)->next; !Nota: Samuel, o método cancela já faz isso. (apagar quando ver)
+      complementNode = &(*complementNode)->next; 
     }while((*complementNode)->next != nullptr);
   } 
   
@@ -131,7 +132,7 @@ bool OrderBook::submit(Order order){
 
       }
 
-      // complementNode = &(*complementNode)->next; !Nota: Samuel, o método cancela já faz isso. (apagar quando ver)
+      complementNode = &(*complementNode)->next; 
     }while((*complementNode)->next != nullptr);
   }
   //
@@ -141,13 +142,13 @@ bool OrderBook::submit(Order order){
     (*currentNode)->next = nullptr;
     (*currentNode)->order = new Order(order);
 
-    printDebug(currentNode);
+    // printDebug(currentNode);
 
     return false;
   }
 
   insert(currentNode, &newNode);
-  printDebug(currentNode);
+  // printDebug(currentNode);
   
   return false;
 }
