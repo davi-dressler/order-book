@@ -17,6 +17,8 @@ int main(){
     OrderBook orderBook;
 
     int n;
+    int m;
+    
     orderBook.printBuyOrders();    
     orderBook.printSellOrders();    
 
@@ -25,10 +27,36 @@ int main(){
     orderBook.printSellOrders();    
 
     orderBook.cancel(1);
+    orderBook.submit(teste1);
+    orderBook.printBuyOrders();    
+    orderBook.printSellOrders(); 
+
+    orderBook.submit(teste2);
+    orderBook.printBuyOrders();    
+    orderBook.printSellOrders(); 
+
+    orderBook.submit(teste3);
+    orderBook.printBuyOrders();    
+    orderBook.printSellOrders(); 
 
     orderBook.submit(teste4);
     orderBook.printBuyOrders();    
     orderBook.printSellOrders();    
+
+    orderBook.submit(teste5);
+    orderBook.printBuyOrders();    
+    orderBook.printSellOrders(); 
+
+    orderBook.submit(teste6);
+    orderBook.printBuyOrders();    
+    orderBook.printSellOrders(); 
+
+    orderBook.submit(teste7);
+    orderBook.printBuyOrders();    
+    orderBook.printSellOrders();
+
+    Order* arr = orderBook.getSellOrders(&n);
+    Transaction* arr_t = orderBook.getTransactions(&m);
 
     orderBook.printTransactions();
     

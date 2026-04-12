@@ -21,6 +21,7 @@ private:
     TransactionNode * transactions;
     int size_buy;
     int size_sell;
+    int size_transactions;
 
 public:
 
